@@ -1,7 +1,7 @@
 # three-gimbal
 A Three.js utility that separates your device's orientation into individual yaw, pitch, and roll rotations without gimbal-lock.
 
-[![](https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Flight_dynamics_with_text.png/1280px-Flight_dynamics_with_text.png)]()
+[![](https://github.com/marquizzo/three-gimbal/blob/master/yaw-pitch-roll.png)]()
 [Image by Wikipedia user ZeroOne](https://en.wikipedia.org/wiki/Aircraft_principal_axes#/media/File:Flight_dynamics_with_text.png)
 
 ### How it works:
