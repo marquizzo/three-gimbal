@@ -16,4 +16,29 @@ This utility uses the `deviceorientation` event that's available in most mobile 
 - [Live demo](http://dyadstudios.com/code/gimbal/). Visit this page with your mobile device to see it in action.
 
 ### Usage
-*Coming Soon*
+1. Import Gimbal.js in whatever method you prefer.
+
+```
+var gimbal = new Gimbal();
+
+// Enables event listeners
+gimbal.enable();
+
+// Disables event listeners
+gimbal.disable();
+
+// Calculates new orientations
+gimbal.update();
+
+// Gets yaw rotation (y-axis)
+// Range [-180, 180], 0 is forward
+gimbal.yaw;
+
+// Gets pitch rotation (x-axis)
+// Range [-180, 180], 0 is horizontal
+gimbal.pitch;
+
+// Gets roll rotation (z-axis)
+// Range [-180, 180], 0 is vertical
+gimbal.roll;
+```
