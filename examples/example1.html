@@ -1,0 +1,211 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+	<title>Gimbal Device Test</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no,shrink-to-fit=no">
+	<meta name="description" content="A Three.js-based device to isolate accelerometer movements by its three-axes components: Yaw (y-axis), Pitch (x-axis), Roll(z-axis) without gimbal-lock.">
+	<meta name="author" content="Marquizzo">
+  <style type="text/css">
+    body, html{
+    	margin: 0px;
+    	padding: 0px;
+    	overflow: hidden;
+      background: #000;
+      color: #fff;
+      font-family: "Helvetica", sans-serif;
+    }
+    .quadrant{
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      border: 1px dashed #666;
+      box-sizing: border-box;
+    }
+    #topLeft{
+      top: 0;
+      left: 0;
+    }
+    #topRight{
+      top: 0;
+      right: 0;
+    }
+    #botLeft{
+      bottom: 0;
+      left: 0;
+    }
+    #botRight{
+      bottom: 0;
+      right: 0;
+    }
+    .label, .angle{
+      position: absolute;
+      width: 50%;
+      left: 10px;
+    }
+    .label{
+      top: 10px;
+      font-weight: 700;
+    }
+    .angle{
+      top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+<main id="pageMain">
+  <div id="topLeft" class="quadrant">
+    <div class="label">Yaw</div>
+    <div class="angle" id="divYaw">0°</div>
+  </div>
+  <div id="topRight" class="quadrant">
+    <div class="label">Pitch</div>
+    <div class="angle" id="divPitch">0°</div>
+  </div>
+  <div id="botLeft" class="quadrant">
+    <div class="label">Roll</div>
+    <div class="angle" id="divRoll">0°</div>
+  </div>
+  <div id="botRight" class="quadrant">
+    <div class="label">All</div>
+    <div class="angle"></div>
+  </div>
+</main>
+
+<!-- Load Three.js --> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/99/three.min.js"></script>
+<!-- Load Gimbal.js --> 
+<script src="../src/Gimbal.js"></script>
+<script>
+// Three.js boilerplate
+var scene, renderer, cam;
+// Arrows
+var arrowYaw, arrowPitch, arrowRoll, arrowAll;
+// DOM Elements
+var divYaw, divPitch, divRoll;
+// Viewport
+var vpW, vpH, ratio;
+
+var gimbal;
+var DEG = 180 / Math.PI;
+
+function init() {
+    scene = new THREE.Scene();
+    cam = new THREE.OrthographicCamera(-10, 10, 10, -10, -10, 10);
+    renderer = new THREE.WebGLRenderer({antialias: true});
+    document.getElementById("pageMain").appendChild(renderer.domElement);
+
+    // Get divs write angles
+    divYaw = document.getElementById("divYaw");
+    divPitch = document.getElementById("divPitch");
+    divRoll = document.getElementById("divRoll");
+
+    buildArrows();
+
+    // Create Gimbal object and enable it
+    gimbal = new Gimbal();
+    gimbal.enable();
+
+    window.addEventListener("resize", onWindowResize, false);
+    onWindowResize();
+
+    // Fire up render loop
+    render();
+}
+
+// Creates a single arrow-shaped mesh
+function makeArrowMesh(color) {
+    var shape = new THREE.Shape();
+    shape.moveTo(1, -2);
+    shape.lineTo(1, 0);
+    shape.lineTo(2, 0);
+    shape.lineTo(0, 2);
+    shape.lineTo(-2, 0);
+    shape.lineTo(-1, 0);
+    shape.lineTo(-1, -2);
+    shape.lineTo(1, -2);
+
+    var extrudeSettings = {
+        steps: 1,
+        depth: 1,
+        bevelEnabled: false
+    }
+
+    var arrowGeom = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
+
+    return new THREE.Mesh(arrowGeom, new THREE.MeshLambertMaterial({color}));
+}
+
+// Builds four arrows in the scene
+function buildArrows() {
+    // Scene lights
+    var light = new THREE.DirectionalLight(0xffffff, 1.0);
+    light.position.set(-0.5, 1, 1);
+    scene.add(light);
+
+    var ambLight = new THREE.DirectionalLight(0xffffff, 0.3);
+    ambLight.position.set(0.5, -1, 1);
+    scene.add(ambLight);
+
+    // Yaw arrow
+    arrowYaw = makeArrowMesh(0xff0099);
+    arrowYaw.position.set(-5, 5, 0);
+    scene.add(arrowYaw);
+
+    // Pitch arrow
+    arrowPitch = makeArrowMesh(0x99ff00);
+    arrowPitch.position.set(5, 5, 0);
+    scene.add(arrowPitch);
+    
+    // Roll arrow
+    arrowRoll = makeArrowMesh(0x0099ff);
+    arrowRoll.position.set(-5, -5, 0);
+    scene.add(arrowRoll);
+    
+    // All arrow
+    arrowAll = makeArrowMesh(0xff9900);
+    arrowAll.position.set(5, -5, 0);
+    scene.add(arrowAll);
+}
+
+function onWindowResize() {
+    vpW = window.innerWidth;
+    vpH = window.innerHeight;
+    ratio = vpW / vpH;
+
+    cam.left = -ratio * 10;
+    cam.right = ratio * 10;
+    cam.updateProjectionMatrix();
+
+    renderer.setSize(vpW, vpH);
+}
+
+function render() {
+    gimbal.update();
+
+    // Get Yaw from gimbal
+    arrowYaw.rotation.y = gimbal.yaw;
+    divYaw.innerHTML = (gimbal.yaw * DEG).toFixed(1) + "°";
+
+    // Get Pitch from gimbal
+    arrowPitch.rotation.x = gimbal.pitch;
+    divPitch.innerHTML = (gimbal.pitch * DEG).toFixed(1) + "°";
+    
+    // Get Roll from gimbal
+    arrowRoll.rotation.z = gimbal.roll;
+    divRoll.innerHTML = (gimbal.roll * DEG).toFixed(1) + "°";
+    
+    // Gimbal.quaternion contains combined rotations
+    arrowAll.quaternion.copy(gimbal.quaternion);
+
+    renderer.render(scene, cam);
+    requestAnimationFrame(render);
+}
+
+init();
+</script>
+
+</body>
+</html>
