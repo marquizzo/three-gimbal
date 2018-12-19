@@ -21,14 +21,17 @@ This utility uses the `deviceorientation` event that's available in most mobile 
 ```
 var gimbal = new Gimbal();
 
-// Enables event listeners
+// Listens to device orientation changes
 gimbal.enable();
 
-// Disables event listeners
+// Stops listening to device orientation changes
 gimbal.disable();
 
 // Calculates new orientations
 gimbal.update();
+
+// Recalibrates gimbal axes to match current phone orientation (experimental)
+gimbal.recalibrate();
 
 // Gets yaw rotation (y-axis)
 // Range [-180, 180], 0 is forward

@@ -51,6 +51,18 @@
     .angle{
       top: 30px;
     }
+    #btn {
+      position: fixed;
+      bottom: 50%;
+      right: 0;
+      width: 50%;
+      background: #333;
+      height: 30px;
+      padding-top: 5px;
+      vertical-align: middle;
+      text-align: center;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -72,6 +84,7 @@
     <div class="label">All</div>
     <div class="angle"></div>
   </div>
+  <div id="btn">Recalibrate</div>
 </main>
 
 <!-- Load Three.js --> 
@@ -96,6 +109,7 @@ function init() {
     cam = new THREE.OrthographicCamera(-10, 10, 10, -10, -10, 10);
     renderer = new THREE.WebGLRenderer({antialias: true});
     document.getElementById("pageMain").appendChild(renderer.domElement);
+    document.getElementById("btn").addEventListener("click", btnClick);
 
     // Get divs write angles
     divYaw = document.getElementById("divYaw");
@@ -180,6 +194,10 @@ function onWindowResize() {
     cam.updateProjectionMatrix();
 
     renderer.setSize(vpW, vpH);
+}
+
+function btnClick() {
+    gimbal.recalibrate();
 }
 
 function render() {
