@@ -40,14 +40,6 @@ class Gimbal {
     }
 
     ////////////////////////////////////// PRIVATE METHODS //////////////////////////////////////
-    // (experimental)
-    recalibrateYPR() {
-        this.axisUp.set(0, 1, 0);
-        this.axisFwd.set(0, 0, 1);
-        this.axisUp.applyQuaternion(this.sensorRotations.quaternion);
-        this.axisFwd.applyQuaternion(this.sensorRotations.quaternion);
-    }
-
     // Recalibrates axes to be oriented to current this.data rotations
     performRecalibration() {
         this.sensorRotations.setRotationFromEuler(this.eulerOrigin);
@@ -83,6 +75,16 @@ class Gimbal {
             this.performRecalibration();
         }
     }
+
+    // (experimental. Currently not in use)
+    /*
+    recalibrateYPR() {
+        this.axisUp.set(0, 1, 0);
+        this.axisFwd.set(0, 0, 1);
+        this.axisUp.applyQuaternion(this.sensorRotations.quaternion);
+        this.axisFwd.applyQuaternion(this.sensorRotations.quaternion);
+    }
+    */
 
     ////////////////////////////////////// PUBLIC METHODS  //////////////////////////////////////
     // Enables gimbal
