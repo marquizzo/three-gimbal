@@ -28,24 +28,30 @@ gimbal.enable();
 // Stops listening to device orientation changes
 gimbal.disable();
 
-// Calculates new orientations
-gimbal.update();
-
 // Recalibrates gimbal axes
 // so current phone orientation is the rotational origin
 gimbal.recalibrate();
 
-// Gets yaw rotation (y-axis)
-// Range [-180, 180], 0 is forward
-gimbal.yaw;
+// Render loop
+function render() {
+    // Performs all necessary calculations
+    gimbal.update();
 
-// Gets pitch rotation (x-axis)
-// Range [-180, 180], 0 is horizontal
-gimbal.pitch;
+    // Gets yaw rotation (y-axis)
+    // Range [-180, 180], 0 is forward
+    gimbal.yaw;
 
-// Gets roll rotation (z-axis)
-// Range [-180, 180], 0 is vertical
-gimbal.roll;
+    // Gets pitch rotation (x-axis)
+    // Range [-180, 180], 0 is horizontal
+    gimbal.pitch;
+
+    // Gets roll rotation (z-axis)
+    // Range [-180, 180], 0 is vertical
+    gimbal.roll;
+
+    requestAnimationFrame(render);    
+}
+
 ```
 
 ##### iOS warning:
