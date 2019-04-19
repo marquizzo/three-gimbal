@@ -1,12 +1,5 @@
-class SensorData {
-    constructor() {
-        this.alpha = 0;
-        this.beta = 0;
-        this.gamma = 0;
-        this.orientation = window.orientation ? window.orientation : 0;
-    }
-}
-
+// Gimbal.js
+// =========
 // Transforms accelerometer alpha, beta, gamma information,
 // then returns readable angles via yaw, pitch & roll
 // yaw: y-axis rotations
@@ -22,7 +15,12 @@ class Gimbal {
         this.vectorUp = new THREE.Vector3();
         this.vectorFwd = new THREE.Vector3();
         this.sensorRotations = new THREE.Object3D();
-        this.data = new SensorData();
+        this.data = {
+            alpha : 0,
+            beta : 0,
+            gamma : 0,
+            orientation : window.orientation ? window.orientation : 0
+        };
         this.requestRecal = false;
 
         this.RAD = Math.PI / 180;
