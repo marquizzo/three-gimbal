@@ -21,7 +21,9 @@ class Gimbal {
             gamma : 0,
             orientation : window.orientation ? window.orientation : 0
         };
-        this.requestRecal = false;
+
+        this.needsUpdate = false;
+        this.recalRequested = false;
 
         this.RAD = Math.PI / 180;
         this.DEG = 180 / Math.PI;
@@ -37,18 +39,7 @@ class Gimbal {
         }
     }
 
-    enable() {
-        this.onDeviceReorientation();
-
-        window.addEventListener("deviceorientation", this.onSensorMove.bind(this), false);
-        window.addEventListener("orientationchange", this.onDeviceReorientation.bind(this), false);
-    }
-
-    disable() {
-        window.removeEventListener("deviceorientation", this.onSensorMove.bind(this), false);
-        window.removeEventListener("orientationchange", this.onDeviceReorientation.bind(this), false);
-    }
-
+    ////////////////////////////////////// PRIVATE METHODS //////////////////////////////////////
     // (experimental)
     recalibrateYPR() {
         this.axisUp.set(0, 1, 0);
@@ -57,8 +48,8 @@ class Gimbal {
         this.axisFwd.applyQuaternion(this.sensorRotations.quaternion);
     }
 
-    // Recalibrates gimbal axes to match current phone orientation
-    recalibrate() {
+    // Recalibrates axes to be oriented to current this.data rotations
+    performRecalibration() {
         this.sensorRotations.setRotationFromEuler(this.eulerOrigin);
 
         // Apply gyroscope rotations
@@ -69,26 +60,57 @@ class Gimbal {
 
         this.quatOrigin.copy(this.sensorRotations.quaternion);
         this.quatOrigin.inverse();
+
+        this.recalRequested = false;
     }
 
-    //////////////////////////////////////////// EVENT LISTENERS  /////////////////////////////////////////////
-    // When switching from portrait <---> landscape
+    // When switching from portrait <-> landscape
     onDeviceReorientation() {
         this.data.orientation = (window.orientation * this.RAD) || 0;
     }
 
     // Update data when device detects movement
+    // Alpha = z axis [0 ,360]
+    // Beta = x axis [-180 , 180]
+    // Gamma = y axis [-90 , 90]
     onSensorMove(event) {
-        // Alpha = z axis [0 ,360]
-        // Beta = x axis [-180 , 180]
-        // Gamma = y axis [-90 , 90]
         this.data.alpha = event.alpha;
         this.data.beta = event.beta;
         this.data.gamma = event.gamma;
+        this.needsUpdate = true;
+
+        if (this.recalRequested) {
+            this.performRecalibration();
+        }
+    }
+
+    ////////////////////////////////////// PUBLIC METHODS  //////////////////////////////////////
+    // Enables gimbal
+    enable() {
+        this.onDeviceReorientation();
+
+        window.addEventListener("deviceorientation", this.onSensorMove.bind(this), false);
+        window.addEventListener("orientationchange", this.onDeviceReorientation.bind(this), false);
+    }
+
+    // Disables gimbal
+    disable() {
+        window.removeEventListener("deviceorientation", this.onSensorMove.bind(this), false);
+        window.removeEventListener("orientationchange", this.onDeviceReorientation.bind(this), false);
+    }
+
+    // Will perform recalibration when this.data is available
+    recalibrate() {
+        this.recalRequested = true;
     }
 
     // Called once per frame
     update() {
+        // Skips calculations if this.data hasn't changed
+        if (this.needsUpdate === false) {
+            return;
+        }
+
         // Reset rotation
         this.sensorRotations.setRotationFromEuler(this.eulerOrigin);
         this.sensorRotations.applyQuaternion(this.quatOrigin);
@@ -117,5 +139,7 @@ class Gimbal {
 
         // Roll is left (-) or right (+) rotation around local z-axis
         this.roll = Math.atan2(-this.vectorUp.x, this.vectorUp.y);
+
+        this.needsUpdate = false;
     }
 }
