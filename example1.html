@@ -3,6 +3,15 @@
 <html lang="en">
 <head>
 	<title>Gimbal Device Test</title>
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@Marquizzo">
+  <meta name="twitter:title" content="Three.js gimbal tool">
+  <meta name="twitter:description" content="A Three.js-based device to isolate accelerometer movements by its three-axes components: Yaw (y-axis), Pitch (x-axis), Roll(z-axis) without gimbal-lock.">
+  <meta name="twitter:image" content="http://dyadstudios.com/code/gimbal/sshot.png">
+  <meta name="twitter:image:width" content="1200">
+  <meta name="twitter:image:height" content="630">
+
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no,shrink-to-fit=no">
 	<meta name="description" content="A Three.js-based device to isolate accelerometer movements by its three-axes components: Yaw (y-axis), Pitch (x-axis), Roll(z-axis) without gimbal-lock.">
@@ -51,7 +60,7 @@
     .angle{
       top: 30px;
     }
-    #btn {
+    #recalibrateBtn {
       position: fixed;
       bottom: 50%;
       right: 0;
@@ -62,6 +71,31 @@
       vertical-align: middle;
       text-align: center;
       font-weight: bold;
+    }
+    #overlay {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #permissionBtn {
+      background: #ccc;
+      color: #111;
+      border-radius: 10px;
+      width: 200px;
+      text-align: center;
+      padding: 20px 10px;
+      border: 1px solid #fff;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+    #permissionBtn:hover {
+      background: #ddd;
     }
   </style>
 </head>
@@ -84,13 +118,16 @@
     <div class="label">All</div>
     <div class="angle"></div>
   </div>
-  <div id="btn">Recalibrate</div>
+  <div id="recalibrateBtn">Recalibrate</div>
+  <div id="overlay">
+    <div id="permissionBtn">Request gyroscope access</div>
+  </div>
 </main>
 
 <!-- Load Three.js --> 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/99/three.min.js"></script>
 <!-- Load Gimbal.js --> 
-<script src="../src/Gimbal.js"></script>
+<script src="./src/Gimbal.js"></script>
 <script>
 // Three.js boilerplate
 var scene, renderer, cam;
@@ -109,7 +146,8 @@ function init() {
     cam = new THREE.OrthographicCamera(-10, 10, 10, -10, -10, 10);
     renderer = new THREE.WebGLRenderer({antialias: true});
     document.getElementById("pageMain").appendChild(renderer.domElement);
-    document.getElementById("btn").addEventListener("click", btnClick);
+    document.getElementById("recalibrateBtn").addEventListener("click", recalibrateBtnClick);
+    document.getElementById("permissionBtn").addEventListener("click", accessBtnClick);
 
     // Get divs write angles
     divYaw = document.getElementById("divYaw");
@@ -118,15 +156,37 @@ function init() {
 
     buildArrows();
 
-    // Create Gimbal object and enable it
+    // Create Gimbal object (disabled by default)
     gimbal = new Gimbal();
-    gimbal.enable();
 
     window.addEventListener("resize", onWindowResize, false);
     onWindowResize();
 
     // Fire up render loop
     render();
+}
+
+// Gimbal access must be requested upon user interaction
+function accessBtnClick() {
+    // Check if request method exists in this browser
+    if (!DeviceMotionEvent || !DeviceMotionEvent.requestPermission) {
+        console.warn("This browser does not support requesting DeviceMotionEvent permission.");
+        document.getElementById("permissionBtn").innerHTML = "Not supported";
+        return;
+    }
+
+    DeviceMotionEvent.requestPermission().then(response => {
+        // Access granted by user
+        if (response == 'granted') {
+            gimbal.enable();
+            document.getElementById("overlay").style.display = "none";
+        }
+        // Access denied by user
+        else {
+            document.getElementById("permissionBtn").innerHTML = "Permission Denied";
+        }
+    });
+
 }
 
 // Creates a single arrow-shaped mesh
@@ -196,7 +256,7 @@ function onWindowResize() {
     renderer.setSize(vpW, vpH);
 }
 
-function btnClick() {
+function recalibrateBtnClick() {
     gimbal.recalibrate();
 }
 
