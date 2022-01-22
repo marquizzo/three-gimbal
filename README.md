@@ -14,7 +14,7 @@ This utility uses the `deviceorientation` event that's available in most mobile 
 ---
 ### Examples
 - [Video of how it works](https://twitter.com/marquizzo/status/953356438184718337). You can see that each rotation is independent of the other.
-- [Live demo](http://dyadstudios.com/code/gimbal/). Visit this page with your mobile device to see it in action.
+- [Live demo](https://dyadstudios.com/code/gimbal/). Visit this page with your mobile device to see it in action.
 ---
 ### Usage
 1. Import Gimbal.js in whatever method you prefer.
