@@ -18,12 +18,21 @@ This utility uses the `deviceorientation` event that's available in most mobile 
 ---
 ### Usage
 1. Import Gimbal.js in whatever method you prefer.
+2. iOS Safari 14.5 and up requires user permission (and https) to get access to gyroscope data
 
 ```javascript
 var gimbal = new Gimbal();
 
-// Listens to device orientation changes
-gimbal.enable();
+// Gimbal access can only be requested upon user interaction
+// and only via https connections
+function onButtonClick() {
+	DeviceMotionEvent.requestPermission().then(response => {
+		if (response == 'granted') {
+			// Now we can enable the gimbal!
+		    gimbal.enable();
+		}
+	});
+}
 
 // Stops listening to device orientation changes
 gimbal.disable();
@@ -55,6 +64,6 @@ function render() {
 ```
 
 ##### iOS warning:
-iOS 12.2 and later will have gyroscope input disabled by default. When updating to 12.2 or later, the user will have to go into `Settings > Safari > Enable Motion & Orientation Access` to enable JavaScript access to these events. Additionally, your website will need to be served via the `https` protocol.
+iOS 14.5 and later will have gyroscope input disabled by default. We must now request access to the gyroscope data upon user click, as demonstrated in the code above. Additionally, your website will need to be served via the `https` protocol.
 
 For more information [Read this discussion in the Three.js forum](https://discourse.threejs.org/t/iphone-ios-12-2-will-disable-gyroscope-access-by-default/6579). 
