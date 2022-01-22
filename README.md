@@ -26,12 +26,12 @@ var gimbal = new Gimbal();
 // Gimbal access can only be requested upon user interaction
 // and only via https connections
 function onButtonClick() {
-	DeviceMotionEvent.requestPermission().then(response => {
-		if (response == 'granted') {
-			// Now we can enable the gimbal!
-		    gimbal.enable();
-		}
-	});
+    DeviceMotionEvent.requestPermission().then(response => {
+        if (response == 'granted') {
+            // Now we can enable the gimbal!
+            gimbal.enable();
+        }
+    });
 }
 
 // Stops listening to device orientation changes
